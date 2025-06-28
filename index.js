@@ -4,8 +4,8 @@ import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
 import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
 import { fileURLToPath } from 'url';
 
 dotenv.config();
@@ -23,16 +23,15 @@ app.use(express.json());
 // LowDB Setup
 const file = path.join(__dirname, 'db.json');
 
-// ✅ Créer le fichier s’il n’existe pas (corrige l’erreur sur Render)
+// Si le fichier n'existe pas, on le crée avec des données par défaut
 if (!fs.existsSync(file)) {
   fs.writeFileSync(file, JSON.stringify({ users: [] }, null, 2));
 }
 
 const adapter = new JSONFile(file);
-const db = new Low(adapter);
+const db = new Low(adapter, { users: [] }); // <- le fix ici
 
 await db.read();
-db.data ||= { users: [] };
 await db.write();
 
 // Utils
@@ -85,6 +84,7 @@ app.post('/api/user', async (req, res) => {
   }
 
   await db.write();
+
   res.json({ success: true, user });
 });
 
