@@ -1,0 +1,16 @@
+{
+	"name": "solaspot-backend",
+	"version": "1.0.0",
+	"type": "module",
+	"scripts": {
+	  "start": "node index.js"
+	},
+	"dependencies": {
+	  "express": "^4.21.2",
+	  "cors": "^2.8.5",
+	  "mongoose": "^7.6.3",
+	  "dotenv": "^16.0.3",
+	  "uuid": "^9.0.0"
+	}
+  }
+  
