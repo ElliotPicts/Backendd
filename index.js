@@ -5,6 +5,7 @@ import { JSONFile } from 'lowdb/node';
 import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 dotenv.config();
@@ -21,6 +22,12 @@ app.use(express.json());
 
 // LowDB Setup
 const file = path.join(__dirname, 'db.json');
+
+// ✅ Créer le fichier s’il n’existe pas (corrige l’erreur sur Render)
+if (!fs.existsSync(file)) {
+  fs.writeFileSync(file, JSON.stringify({ users: [] }, null, 2));
+}
+
 const adapter = new JSONFile(file);
 const db = new Low(adapter);
 
@@ -78,7 +85,6 @@ app.post('/api/user', async (req, res) => {
   }
 
   await db.write();
-
   res.json({ success: true, user });
 });
 
@@ -87,7 +93,6 @@ app.get('/api/user/:walletAddress', async (req, res) => {
   await db.read();
   const user = db.data.users.find((u) => u.walletAddress === req.params.walletAddress);
   if (!user) {
-    // Auto create user if not found
     const username = generateUsername(req.params.walletAddress);
     const referralCode = generateReferralCode();
     const newUser = {
@@ -109,7 +114,7 @@ app.get('/api/user/:walletAddress', async (req, res) => {
   res.json({ success: true, user });
 });
 
-// Update user info (username, referralCode, avatar)
+// Update user
 app.put('/api/user/:walletAddress', async (req, res) => {
   const { username, referralCode, avatarUrl } = req.body;
   await db.read();
